@@ -46,6 +46,12 @@
         "options": {
           "passWithNoTests": true
         }
+      },
+      "db-push": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx drizzle-kit push --config ./api/drizzle.config.ts"
+        }
       }
     }
   }
