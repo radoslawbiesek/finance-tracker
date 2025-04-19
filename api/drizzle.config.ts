@@ -9,7 +9,7 @@ if (!dbUrl) {
 }
 
 export default defineConfig({
-  schema: './api/src/database/database.schema.ts',
+  schema: './api/src/database/schema/*.schema.ts',
   out: './drizzle',
   dialect: 'sqlite',
   dbCredentials: {
