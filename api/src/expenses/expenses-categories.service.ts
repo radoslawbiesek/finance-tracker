@@ -1,4 +1,4 @@
-import { Body, Injectable, NotFoundException, Param } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 
 import { CreateExpensesCategoryDto } from './dto/create-expenses-category.dto';
@@ -9,14 +9,14 @@ import { expensesCategories } from '../database/schema/expenses.schema';
 @Injectable()
 export class ExpensesCategoriesService {
   constructor(private readonly databaseService: DatabaseService) {}
-  async create(@Body() createExpensesCategoryDto: CreateExpensesCategoryDto) {
+  async create(createExpensesCategoryDto: CreateExpensesCategoryDto) {
     const userId = 1; // TODO: get user id from request
 
     return this.databaseService.db
       .insert(expensesCategories)
       .values({
-        name: createExpensesCategoryDto.name,
         userId,
+        ...createExpensesCategoryDto,
       })
       .returning();
   }
@@ -32,7 +32,7 @@ export class ExpensesCategoriesService {
     return { results };
   }
 
-  async findOne(@Param() id: number) {
+  async findOne(id: number) {
     const userId = 1; // TODO: get user id from request
 
     const result = await this.databaseService.db
@@ -45,25 +45,22 @@ export class ExpensesCategoriesService {
         )
       );
 
-    const [category] = result;
-    if (!category) {
+    if (!result.length) {
       throw new NotFoundException(`Expenses category with id ${id} not found`);
     }
 
-    return category;
+    return result[0];
   }
 
   async update(
-    @Param() id: number,
-    @Body() updateExpensesCategoryDto: UpdateExpensesCategoryDto
+    id: number,
+    updateExpensesCategoryDto: UpdateExpensesCategoryDto
   ) {
     const userId = 1; // TODO: get user id from request
 
     const result = await this.databaseService.db
       .update(expensesCategories)
-      .set({
-        name: updateExpensesCategoryDto.name,
-      })
+      .set(updateExpensesCategoryDto)
       .where(
         and(
           eq(expensesCategories.userId, userId),
@@ -72,15 +69,14 @@ export class ExpensesCategoriesService {
       )
       .returning();
 
-    const [category] = result;
-    if (!category) {
+    if (result.length === 0) {
       throw new NotFoundException(`Expenses category with id ${id} not found`);
     }
 
-    return category;
+    return result[0];
   }
 
-  async remove(@Param() id: number) {
+  async remove(id: number) {
     const userId = 1; // TODO: get user id from request
 
     const result = await this.databaseService.db
@@ -93,11 +89,10 @@ export class ExpensesCategoriesService {
       )
       .returning();
 
-    const [category] = result;
-    if (!category) {
+    if (result.length === 0) {
       throw new NotFoundException(`Expenses category with id ${id} not found`);
     }
 
-    return category;
+    return result[0];
   }
 }
